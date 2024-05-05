@@ -200,6 +200,8 @@ def upload_file(request):
 
 
 # FINAL OUTPUT
+
+
 import pandas as pd
 from openpyxl import Workbook
 from openpyxl.drawing.image import Image
@@ -209,12 +211,23 @@ import os
 
 
 # Read the data from the Excel file
-df = pd.read_excel('TestData_BETA.xlsx')
+# df = pd.read_excel('TestData_BETA.xlsx')
+try:
+    df = pd.read_excel('TestData_BETA.xlsx')
+except FileNotFoundError:
+    print("Failed to find 'TestData_BETA1.xlsx'. Please check the file path.")
+    raise
+
+try:
+    img = Image("British_Council_Logo.png")
+except FileNotFoundError:
+    print("Failed to find 'British_Council_Logo.png'. Please check the file path.")
+    raise
 
 # Function to generate exam desk cards
 def generate_exam_desk_cards(data):
     # Group students by exam venue, exam room, session, board, and date
-    grouped_data = data.groupby(['Venue', 'Exam Room', 'Session', 'Board', 'Date'])
+    grouped_data = data.groupby(['Board', 'Venue', 'Exam Room', 'Session', 'Date'])
 
     # Define colors for each unique paper code
     colors = [PatternFill(start_color='FFC7CE', end_color='FFC7CE', fill_type='solid'),
@@ -234,46 +247,28 @@ def generate_exam_desk_cards(data):
               PatternFill(start_color='FF6347', end_color='FF6347', fill_type='solid')]
 
     # Iterate over each group and generate exam desk cards
-    for (venue, exam_room, session, Board, date), group in grouped_data:
-        # # Create a folder for the venue and exam room if it doesn't exist
-        # folder_path = os.path.join('Exam_Seat_plan', f'{venue}_{exam_room}_{date.strftime("%Y-%m-%d")}')
-        # os.makedirs(folder_path, exist_ok=True)
-
-        # # Create a file name for the exam desk cards
-        # file_name = f'Seat_Planing_for_{venue}_{exam_room}_{session}_{date.strftime("%m-%d-%Y")}.xlsx'
-        # file_path = os.path.join(folder_path, file_name)
-
+    for (board, venue, exam_room, session, date), group in grouped_data:
         date_str = date.strftime("%Y-%m-%d")
-        venue_folder = os.path.join('Exam_Seat_planner', venue, date_str)
-        os.makedirs(venue_folder, exist_ok=True)
-
-        # # Create a folder for the venue if it doesn't exist
-        # venue_folder = os.path.join('Exam_Seat_planner', venue)
-        # os.makedirs(venue_folder, exist_ok=True)
-
-        # # Create a folder for the exam room if it doesn't exist
-        # exam_room_folder = os.path.join(venue_folder, exam_room)
-        # os.makedirs(exam_room_folder, exist_ok=True)
+        directory_path = os.path.join('Exam_Seat_planner', board, venue, date_str)
+        os.makedirs(directory_path, exist_ok=True)
 
         # Define file path
         file_name = f'Seat_Plan_{venue}_{exam_room}_{session}_{date_str}.xlsx'
-        file_path = os.path.join(venue_folder, file_name)
-        # # Create a file name for the exam desk cards
-        # file_name = f'Seat_Planing_for_{venue}_{exam_room}_{session}_{date.strftime("%m-%d-%Y")}.xlsx'
-        # file_path = os.path.join(exam_room_folder, file_name)
+        file_path = os.path.join(directory_path, file_name)
+
 
         # Create a workbook
         wb = Workbook()
         ws = wb.active
 
         # Add logo to the worksheet with adjusted position
-        img = Image("British_Council_Logo.png")
+        # img = Image("British_Council_Logo.png")
         img.width = 150  # Adjust the width of the image (optional)
         img.height = 80  # Adjust the height of the image (optional)
         ws.add_image(img, 'A1')  # Set the anchor to 'A1' to position the image within the cell
 
         # Add headers and other details
-        ws['A5'] = f"{Board} Examinations - {date.strftime('%Y-%m-%d')}"
+        ws['A5'] = f"{board} Examinations - {date.strftime('%Y-%m-%d')}"
         ws['A6'] = f"Venue: {venue}, Exam Room: {exam_room}"
         ws['A7'] = f"Session - {session}"
         ws['A8'] = f"Date: {date.strftime('%Y-%m-%d')}"
@@ -329,7 +324,7 @@ def generate_exam_desk_cards(data):
         for i, paper_code in enumerate(group['Paper code'].unique(), start=11):
             count = len(group[group['Paper code'] == paper_code])
             if count > 0:
-                # Write total count for each paper code
+                # Write total count for each paper code 
                 ws.merge_cells(start_row=i, start_column=start_col, end_row=i, end_column=start_col + 1)
                 ws.cell(row=i, column=start_col).value = f"Paper Code {paper_code}"
                 ws.cell(row=i, column=start_col).font = Font(size=8)
@@ -343,14 +338,16 @@ def generate_exam_desk_cards(data):
 
         # Add column numbers dynamically starting from cell B14
         for col_num in range(start_col, start_col + max_column):
-            ws.cell(row=17, column=col_num).value = f"Column {get_column_letter(col_num)}"
+            ws.cell(row=17, column=col_num).value = f"Column {col_num}"
 
-        # Save the workbook
+        # # Save the workbook
         wb.save(file_path)
-        print(f"Exam desk cards saved successfully: {file_path}")
+        print(f"Successfully saved as: {file_path}")
 
-# Generate exam desk cards
+
+# # Generate exam desk cards
 generate_exam_desk_cards(df)
+
 
 
 '''
