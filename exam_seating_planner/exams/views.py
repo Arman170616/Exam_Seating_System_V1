@@ -238,9 +238,9 @@ import os
 # Read the data from the Excel file
 # df = pd.read_excel('TestData_BETA.xlsx')
 try:
-    df = pd.read_excel('TestData_8May11.xlsx')
+    df = pd.read_excel('13 May_Tokyo_V1.xlsx')
 except FileNotFoundError:
-    print("Failed to find 'TestData_8May11.xlsx'. Please check the file path.")
+    print("Failed to find '13 May_Tokyo_V1.xlsx'. Please check the file path.")
     raise
 
 try:
@@ -286,14 +286,12 @@ def generate_exam_desk_cards(data):
         wb = Workbook()
         ws = wb.active
 
-        # Add logo to the worksheet with adjusted position
-        # img = Image("British_Council_Logo.png")
-        img.width = 150  # Adjust the width of the image (optional)
-        img.height = 80  # Adjust the height of the image (optional)
-        ws.add_image(img, 'A1')  # Set the anchor to 'A1' to position the image within the cell
-
+        img.width = 150  
+        img.height = 80  
+        ws.add_image(img, 'A1')  
         # Add headers and other details
-        ws['A5'] = f"Examinations - {date.strftime('%Y-%m-%d')}"
+        # ws['A5'] = f"Pearson Edexcel & Cambridge Int'l Examination - {date.strftime('%Y-%m-%d')}"
+        ws['A5'] = f"Pearson Edexcel & Cambridge International Examination May/June 2024"
         ws['A6'] = f"Venue: {venue}, Exam Room: {exam_room}"
         ws['A7'] = f"Session - {session}"
         ws['A8'] = f"Date: {date.strftime('%Y-%m-%d')}"
@@ -363,8 +361,8 @@ def generate_exam_desk_cards(data):
 
         # Add column numbers dynamically starting from cell A17
         for col_num in range(start_col, start_col + max_column):
-            ws.cell(row=17, column=col_num).value = f"Column {col_num}"
-            ws.cell(row=17, column=col_num).font = Font(size=9)
+            ws.cell(row=18, column=col_num).value = f"Column {col_num}"
+            ws.cell(row=18, column=col_num).font = Font(size=9)
 
         # # Save the workbook
         wb.save(file_path)
